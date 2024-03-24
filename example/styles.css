@@ -1,0 +1,66 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+
+:root {
+  --color-white: #ebf0f6;
+  --color-light: #98ccd3;
+  --color-dark: #364e68;
+  --color-black: #132238;
+  --color-error: #fc9484;
+
+  font-family: "Roboto", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+:root * {
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: justify;
+}
+
+.container > *:not(:last-child) {
+  margin-bottom: 1.2em;
+}
+
+.table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  background-color: var(--color-white);
+  color: var(--color-black);
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.table thead {
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  font-size: 0.8em;
+  border-bottom: 2px solid white;
+}
+
+.table td,
+.table th {
+  min-width: 80px;
+  padding: 2px;
+}
+
+.table td:not(:last-child),
+.table th:not(:last-child) {
+  border-right: 2px solid white;
+}
+
+.error {
+  border: 2px solid var(--color-error) !important;
+}
