@@ -3,6 +3,7 @@ name = "leptos_datatable"
 license = "MIT"
 version = "0.1.0"
 edition = "2021"
+repository = "https://github.com/mk0218/leptos-datatable"
 description = "A leptos component for creating tables with data validation."
 
 [dependencies]
