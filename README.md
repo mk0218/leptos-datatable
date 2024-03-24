@@ -5,6 +5,9 @@ The `DataTable` component renders HTML table with given `columns` and `data` pro
 `data` is validated if the cell datum has same type as its column. Macros for creating columns and
 data rows are supported.
 
+Please note that the columns and data are not reactive for current release. In future releases, their
+implementation will be modified to use signals.
+
 ## Basic usage
 
 ```Rust
