@@ -1,4 +1,4 @@
-use leptos::IntoView;
+use leptos::{IntoView, RwSignal, SignalSet, SignalUpdate};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum DataType {
@@ -59,6 +59,12 @@ impl From<i32> for Datum {
     }
 }
 
+impl From<f64> for Datum {
+    fn from(value: f64) -> Self {
+        Datum::Number(Some(value))
+    }
+}
+
 impl IntoView for Datum {
     fn into_view(self) -> leptos::View {
         match self {
@@ -69,24 +75,18 @@ impl IntoView for Datum {
     }
 }
 
-impl From<f64> for Datum {
-    fn from(value: f64) -> Self {
-        Datum::Number(Some(value))
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
-pub struct Row(pub Vec<Datum>);
+pub struct Row(pub Vec<RwSignal<Datum>>);
 
 #[macro_export]
 macro_rules! row {
     [$($v: expr),+] => {
-        Row(vec![$($v.into()),+])
+        Row(vec![$(RwSignal::from(Datum::from($v))),+])
     };
 }
 
 impl Row {
-    pub fn unwrap(&self) -> Vec<Datum> {
+    pub fn unwrap(&self) -> Vec<RwSignal<Datum>> {
         match self {
             Row(row) => row.to_vec()
         }
@@ -102,11 +102,25 @@ impl Data {
             Data(rows) => rows.to_vec()
         }
     }
+
+    pub fn get(&self, row: usize, col: usize) -> RwSignal<Datum> {
+        self.0[row].0[col]
+    }
+
+    pub fn set<T>(&self, row: usize, col: usize, value: T) where T: Into<Datum> {
+        self.0[row].0[col].set(value.into())
+    }
+
+    pub fn update<F>(&self, row: usize, col: usize, update: F) where F: FnOnce(&mut Datum) -> () + 'static {
+        self.0[row].0[col].update(update)
+    }
 }
 
 
 #[cfg(test)]
 mod tests {
+    use leptos::SignalGetUntracked;
+
     use super::*;
 
     #[test]
@@ -141,7 +155,13 @@ mod tests {
     #[test]
     fn test_macro_row() {
         let row = row![1, "A", 2, "B", 3.1, "c", "d"];
-        assert_eq!(row, Row(vec![
+        let row_iter = row.unwrap().into_iter();
+
+        let row_data: Vec<_> = row_iter.map(|signal| {
+            signal.get_untracked()
+        }).collect();
+        
+        assert_eq!(row_data, vec![
             Datum::Number(Some(1.0)),
             Datum::String(Some("A".into())),
             Datum::Number(Some(2.0)),
@@ -149,6 +169,19 @@ mod tests {
             Datum::Number(Some(3.1)),
             Datum::String(Some("c".into())),
             Datum::String(Some("d".into())),
-        ]))
+        ])
+    }
+
+    #[test]
+    fn test_data_get() {
+        let data = Data(vec![row![0, 1, 2], row![3, 4, 5]]);
+        assert_eq!(data.get(1, 0).get_untracked(), Datum::Number(Some(3.0)));
+    }
+
+    #[test]
+    fn test_data_set() {
+        let data = Data(vec![row![0, 1, 2], row![3, 4, 5]]);
+        data.set(1, 0, 123123);
+        assert_eq!(data.get(1, 0).get_untracked(), Datum::Number(Some(123123.0)));
     }
 }

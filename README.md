@@ -5,13 +5,12 @@ The `DataTable` component renders HTML table with given `columns` and `data` pro
 `data` is validated if the cell datum has same type as its column. Macros for creating columns and
 data rows are supported.
 
-Please note that the columns and data are not reactive for current release. In future releases, their
-implementation will be modified to use signals.
-
 ## Basic usage
 
-```Rust
-use leptos::{component, IntoView, mount_to_body, view};
+Now, `data` prop for `DataTable` needs to be `leptos::RwSignal<Data>`.
+
+```rust
+use leptos::*;
 use leptos_datatable::*;
 
 #[component]
@@ -26,10 +25,12 @@ fn App() -> impl IntoView {
     let row2 = row!["2", 3, "d"];
     let row3 = row!["a", "s", "d"]; // "s" is wrong!
 
+    let data = create_rw_signal(Data(vec![row1, row2, row3]));
+
     view! {
         <DataTable
             columns={columns}
-            data={Data(vec![row1, row2, row3])}
+            data={data}
             class="table"
         />
     }
@@ -46,7 +47,9 @@ fn App() -> impl IntoView {
 
 ### Column names
 
-```Rust
+```rust
+use leptos_datatable::*;
+
 let columns = columns!["Title", "Year", "Rate"];
 ```
 
@@ -54,13 +57,17 @@ In this case, data types are specified as `Any`.
 
 ### Column names with types
 
-```Rust
+```rust
+use leptos_datatable::*;
+
 let columns = columns!["Name", DataType::String; "Age", DataType::Number];
 ```
 
 ### No column names, all same types
 
-```Rust
+```rust
+use leptos_datatable::*;
+
 let columns = columns![DataType::Number; 3];
 ```
 
@@ -69,7 +76,10 @@ the column names. In future releases, prop for hiding table header will be added
 
 ### Creating a row
 
-```Rust
+```rust
+use leptos::RwSignal;
+use leptos_datatable::*;
+
 let row = row![1, "A", 2, "B", 3.1, "c", "d"];
 ```
 
@@ -83,6 +93,32 @@ Cells with different data types from their columns are marked with red border in
 ![alt text](example.png)
 
 Console warnings for wrong data types will be added in future.
+
+## Basic data operations
+
+`get`, `set`, and `update` are implemented for manipulating value in a specific cell.
+
+```rust
+use leptos::*;
+use leptos_datatable::*;
+
+let row1 = row![0, 1, 2];
+let row2 = row![3, 4, 5];
+let data = create_rw_signal(Data(vec![row1, row2]));
+
+assert_eq!(data.get().get(0, 2).get(), 2.into());
+
+data.with(|d| d.set(0, 2, 10));
+assert_eq!(data.get().get(0, 2).get(), 10.into());
+
+data.with(|d| d.update(1, 0, |v| {
+    if let Datum::Number(Some(n)) = v {
+        *v = (*n + 1.0).into();
+    }
+}));
+
+assert_eq!(data.get().get(1, 0).get(), 4.into());
+```
 
 ## Styling
 

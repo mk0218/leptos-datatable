@@ -1,13 +1,13 @@
 
-use leptos::{component, leptos_dom::logging::console_log, view, CollectView, IntoView};
+use leptos::{component, leptos_dom::logging::console_log, view, CollectView, IntoView, RwSignal, SignalGet};
 use crate::{Column, Data, DataType, Datum, Row};
 
 #[derive(Debug)]
 struct DataTypeMismatch((), ());
 
 #[component]
-fn TCell(r#type: DataType, datum: Datum) -> impl IntoView {
-    let valid = match (&datum, r#type) {
+fn TCell(r#type: DataType, datum: RwSignal<Datum>) -> impl IntoView {
+    let valid = match (datum.get(), r#type) {
         (Datum::Number(_), DataType::Number) |
         (Datum::String(_), DataType::String) |
         (_, DataType::Any) => Ok(()),
@@ -52,11 +52,10 @@ fn TRow<'a>(columns: &'a Vec<Column>, row: Row) -> impl IntoView {
 #[component]
 pub fn DataTable(
     columns: Vec<Column>,
-    data: Data,
+    data: RwSignal<Data>,
     #[prop(optional, into)]
     class: String,
 ) -> impl IntoView {
-    console_log(&format!("{:?}", class));
     view! {
         <table class={class}>
             <thead>
@@ -67,7 +66,7 @@ pub fn DataTable(
                 </tr>
             </thead>
             <tbody>
-                {data.unwrap().into_iter().map(|row| {
+                {data.get().unwrap().into_iter().map(|row| {
                     view! { <TRow columns={&columns} row={row} /> }
                 }).collect_view()}
             </tbody>

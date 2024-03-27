@@ -64,3 +64,14 @@ body {
 .error {
   border: 2px solid var(--color-error) !important;
 }
+
+button {
+  padding: 3px 6px;
+  border-radius: 2px;
+  border: none;
+  background-color: var(--color-dark);
+  color: var(--color-white);
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+}

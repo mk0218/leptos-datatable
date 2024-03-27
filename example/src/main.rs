@@ -1,4 +1,4 @@
-use leptos::{component, IntoView, mount_to_body, view};
+use leptos::*;
 use leptos_datatable::*;
 
 fn main() { mount_to_body(|| view! { <App /> })}
@@ -15,14 +15,27 @@ fn App() -> impl IntoView {
     let row2 = row!["2", 3, "d"];
     let row3 = row!["a", "s", "d"]; // "s" is wrong!
 
+    let data = RwSignal::from(Data(vec![row1, row2, row3]));
+
+    let increment = move |_| {
+        data.with(|d| d.update(0, 1, |v| {
+            if let Datum::Number(Some(n)) = v {
+                *v = (*n + 1.0).into()
+            }
+        }))
+    };
+    
     view! {
         <div class="container">
             <h2>DataTable Example</h2>
             <DataTable
                 columns={columns}
-                data={Data(vec![row1, row2, row3])}
+                data={data}
                 class="table"
             />
+            <button type="button" on:click=increment>
+                "Add 1 to (row 1, column 2)"
+            </button>
             <div>
                 <p>
                     "Data types can be specified in column definition. `Number`, `String`,
